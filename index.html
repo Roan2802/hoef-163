@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HOEF! Ede — Appartement 163 · Ervaar je nieuwe thuis in 3D</title>
 <meta name="description" content="Tweekamer-hoekappartement van 41 m² met zuidbalkon in nieuwbouwproject HOEF! Ede. Bekijk, beleef en richt het in met de interactieve 3D-simulator." />
+<meta name="robots" content="noindex, nofollow" />
+<script src="src/gate.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
 <style>
@@ -104,10 +106,30 @@
 
   #spec { padding: 12svh 0; background: var(--bg2); border-top: 1px solid var(--line); }
   #spec .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 48px; }
-  .scard { border: 1px solid var(--line); border-radius: 18px; padding: 26px; background: rgba(243, 237, 228, .025); }
-  .scard .ico { font-size: 26px; }
+  .scard { border: 1px solid var(--line); border-radius: 18px; padding: 26px; background: rgba(243, 237, 228, .025); transition: border-color .3s, transform .3s; }
+  .scard:hover { border-color: rgba(232, 116, 58, .45); transform: translateY(-4px); }
+  .scard .idx { font-family: 'Fraunces', serif; font-style: italic; font-weight: 300; font-size: 30px; color: var(--brick2); }
   .scard h3 { font-size: 21px; margin: 14px 0 8px; }
   .scard p { color: var(--muted); font-size: 14.5px; }
+
+  /* marquee */
+  #marquee { overflow: clip; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 22px 0; background: var(--bg); }
+  #marquee .track { display: flex; gap: 0; width: max-content; animation: mq 28s linear infinite; }
+  #marquee span {
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: clamp(22px, 3.4vw, 40px); white-space: nowrap; padding-right: 18px;
+    color: transparent; -webkit-text-stroke: 1px rgba(243, 237, 228, .4);
+  }
+  #marquee span i { font-style: normal; color: var(--brick2); -webkit-text-stroke: 0; }
+  @keyframes mq { to { transform: translateX(-50%); } }
+
+  /* custom cursor (alleen desktop) */
+  @media (pointer: fine) {
+    #cur, #curDot { position: fixed; top: 0; left: 0; pointer-events: none; z-index: 999; border-radius: 50%; transform: translate(-50%, -50%); }
+    #cur { width: 38px; height: 38px; border: 1px solid rgba(232, 116, 58, .65); transition: width .25s, height .25s, opacity .25s; }
+    #curDot { width: 5px; height: 5px; background: var(--brick2); }
+    body.cur-hover #cur { width: 64px; height: 64px; opacity: .55; }
+  }
+  #dust { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 
   #loc { position: relative; overflow: clip; }
   #loc > img { width: 100%; height: 86svh; object-fit: cover; display: block; transform: scale(1.2); filter: brightness(.55); }
@@ -137,8 +159,11 @@
   <a class="cta" href="sim.html">Open 3D-simulator</a>
 </nav>
 
+<div id="cur"></div><div id="curDot"></div>
+
 <section id="hero">
   <div class="bg"><img src="img/hero.jpg" alt="Artist impression HOEF! Ede" /></div>
+  <canvas id="dust"></canvas>
   <div class="inner">
     <div class="line"><span class="kicker">Nieuwbouw · Hoefweg, Ede-Zuid</span></div>
     <h1>
@@ -161,9 +186,16 @@
     <div class="cell"><div class="num"><span data-count="41">0</span><small> m²</small></div><div class="lbl">Woonoppervlakte</div></div>
     <div class="cell"><div class="num"><span data-count="2">0</span><small> e</small></div><div class="lbl">Verdieping · hoek</div></div>
     <div class="cell"><div class="num"><span data-count="195">0</span><small> cm</small></div><div class="lbl">Balkondiepte · zuid</div></div>
-    <div class="cell"><div class="num">A<small>+++</small></div><div class="lbl">Energielabel</div></div>
+    <div class="cell"><div class="num">A<small>++</small></div><div class="lbl">Energielabel</div></div>
   </div>
 </section>
+
+<div id="marquee" aria-hidden="true">
+  <div class="track">
+    <span>Hoekappartement <i>·</i> 41 m² <i>·</i> Zuidbalkon <i>·</i> Ede-Zuid <i>·</i> Energielabel A++ <i>·</i> </span>
+    <span>Hoekappartement <i>·</i> 41 m² <i>·</i> Zuidbalkon <i>·</i> Ede-Zuid <i>·</i> Energielabel A++ <i>·</i> </span>
+  </div>
+</div>
 
 <section id="gallery">
   <div class="wrap">
@@ -215,12 +247,12 @@
     <model-viewer class="reveal" src="exports/HOEF-163.glb" camera-controls auto-rotate shadow-intensity="1.1" camera-orbit="35deg 65deg 14m" exposure="1.1" interaction-prompt="none"></model-viewer>
     <a class="btn-xl reveal" href="sim.html">Start de simulator →</a>
     <div class="feat">
-      <span class="reveal">🚶 Rondlopen in first-person</span>
-      <span class="reveal">🛋 60+ meubels & accessoires</span>
-      <span class="reveal">🎨 Kleuren & muurverf</span>
-      <span class="reveal">🚪 Draai- of schuifdeuren</span>
-      <span class="reveal">📱 Werkt op je telefoon</span>
-      <span class="reveal">⬇ Export naar Blender & co</span>
+      <span class="reveal">Rondlopen in first-person</span>
+      <span class="reveal">60+ meubels & accessoires</span>
+      <span class="reveal">Kleuren & muurverf</span>
+      <span class="reveal">Draai- of schuifdeuren</span>
+      <span class="reveal">Werkt op je telefoon</span>
+      <span class="reveal">Export naar Blender & co</span>
     </div>
   </div>
 </section>
@@ -230,12 +262,12 @@
     <span class="kicker reveal">Afwerking volgens technische omschrijving</span>
     <h2 class="reveal" style="font-size:clamp(32px,4.4vw,56px);margin-top:14px">Hoogwaardig opgeleverd</h2>
     <div class="grid">
-      <div class="scard reveal"><div class="ico">🛁</div><h3>Complete badkamer</h3><p>Wandtegels mat wit 30×60 tot het plafond, antraciet vloertegels 30×30, inloopdouche met regendouche, wandcloset en wastafelmeubel.</p></div>
-      <div class="scard reveal"><div class="ico">🌡</div><h3>Duurzaam comfort</h3><p>Ventilatielucht/water-warmtepomp, vloerverwarming én -koeling in elke ruimte, HR++ beglazing en energielabel A+++.</p></div>
-      <div class="scard reveal"><div class="ico">🔆</div><h3>Zon op het zuiden</h3><p>Ruim balkon van prefab beton over de volle gevelbreedte, met automatische screens op de zuidgevel van de 2e verdieping.</p></div>
-      <div class="scard reveal"><div class="ico">🚗</div><h3>Eigen parkeerplek</h3><p>Iedere woning beschikt over een eigen plek in de stallingsgarage onder het gebouw, plus een fietsenstalling.</p></div>
-      <div class="scard reveal"><div class="ico">🧱</div><h3>Degelijk gebouwd</h3><p>Kalkzandsteen dragende wanden, breedplaatvloeren en kunststof kozijnen — geluidsisolatie conform Bbl.</p></div>
-      <div class="scard reveal"><div class="ico">📍</div><h3>Reehorst, Ede-Zuid</h3><p>Groene, rustige wijk. In 5 minuten op intercitystation Ede-Wageningen, zo de A12/A30 op, en het Hoekelumse Bos om de hoek.</p></div>
+      <div class="scard reveal"><div class="idx">01</div><h3>Complete badkamer</h3><p>Wandtegels mat wit 30×60 tot het plafond, antraciet vloertegels 30×30, inloopdouche met regendouche, wandcloset en wastafelmeubel.</p></div>
+      <div class="scard reveal"><div class="idx">02</div><h3>Duurzaam comfort</h3><p>Ventilatielucht/water-warmtepomp, vloerverwarming én -koeling in elke ruimte, HR++ beglazing en energielabel A++.</p></div>
+      <div class="scard reveal"><div class="idx">03</div><h3>Zon op het zuiden</h3><p>Ruim balkon van prefab beton over de volle gevelbreedte, met automatische screens op de zuidgevel van de 2e verdieping.</p></div>
+      <div class="scard reveal"><div class="idx">04</div><h3>Eigen parkeerplek</h3><p>Iedere woning beschikt over een eigen plek in de stallingsgarage onder het gebouw, plus een fietsenstalling.</p></div>
+      <div class="scard reveal"><div class="idx">05</div><h3>Degelijk gebouwd</h3><p>Kalkzandsteen dragende wanden, breedplaatvloeren en kunststof kozijnen — geluidsisolatie conform Bbl.</p></div>
+      <div class="scard reveal"><div class="idx">06</div><h3>Reehorst, Ede-Zuid</h3><p>Groene, rustige wijk. In 5 minuten op intercitystation Ede-Wageningen, zo de A12/A30 op, en het Hoekelumse Bos om de hoek.</p></div>
     </div>
   </div>
 </section>
@@ -310,6 +342,56 @@
       scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: true }
     });
   });
+
+  // zwevende lichtdeeltjes over de hero
+  const dc = document.getElementById('dust'), dx = dc.getContext('2d');
+  let DW, DH, parts = [];
+  function dustInit() {
+    DW = dc.width = dc.offsetWidth; DH = dc.height = dc.offsetHeight;
+    parts = Array.from({ length: 46 }, () => ({
+      x: Math.random() * DW, y: Math.random() * DH,
+      r: .6 + Math.random() * 2.1, s: .08 + Math.random() * .3,
+      a: .12 + Math.random() * .3, ph: Math.random() * Math.PI * 2
+    }));
+  }
+  dustInit(); addEventListener('resize', dustInit);
+  (function dust(t) {
+    dx.clearRect(0, 0, DW, DH);
+    for (const p of parts) {
+      p.y -= p.s; p.x += Math.sin(t / 2200 + p.ph) * .18;
+      if (p.y < -4) { p.y = DH + 4; p.x = Math.random() * DW; }
+      dx.beginPath(); dx.arc(p.x, p.y, p.r, 0, 7);
+      dx.fillStyle = `rgba(243,230,210,${p.a})`; dx.fill();
+    }
+    requestAnimationFrame(dust);
+  })(0);
+
+  // subtiele 3D-tilt op galerijkaarten
+  document.querySelectorAll('.gcard').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const rx = ((e.clientY - r.top) / r.height - .5) * -3.5;
+      const ry = ((e.clientX - r.left) / r.width - .5) * 3.5;
+      gsap.to(card, { rotateX: rx, rotateY: ry, transformPerspective: 900, duration: .5, ease: 'power2.out' });
+    });
+    card.addEventListener('mouseleave', () => gsap.to(card, { rotateX: 0, rotateY: 0, duration: .7, ease: 'power3.out' }));
+  });
+
+  // eigen cursor (desktop)
+  if (matchMedia('(pointer: fine)').matches) {
+    const cur = document.getElementById('cur'), dot = document.getElementById('curDot');
+    addEventListener('mousemove', e => {
+      gsap.to(cur, { x: e.clientX, y: e.clientY, duration: .35, ease: 'power3.out' });
+      gsap.to(dot, { x: e.clientX, y: e.clientY, duration: .08 });
+    });
+    document.querySelectorAll('a, button, model-viewer').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cur-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hover'));
+    });
+  } else {
+    document.getElementById('cur').remove();
+    document.getElementById('curDot').remove();
+  }
 </script>
 </body>
 </html>

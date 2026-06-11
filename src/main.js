@@ -52,10 +52,11 @@ let mode = 'edit';
 let apt = null, colliders = [], ceiling = null, matRef = null;
 let wallMeshes = [];
 let wallColor = null;
+let kitchenOpt = { front: null, top: null };
 function rebuildApartment() {
   if (apt) scene.remove(apt);
   const style = $('slideToggle')?.checked ? 'schuif' : 'draai';
-  const r = buildApartment({ document, withFixtures: true, doorStyle: style });
+  const r = buildApartment({ document, withFixtures: true, doorStyle: style, kitchen: kitchenOpt });
   apt = r.group; ceiling = r.ceiling; matRef = r.materials;
   colliders.length = 0; colliders.push(...r.colliders);
   if (wallColor) matRef.wall.color.set(wallColor);
@@ -84,7 +85,7 @@ let yaw = Math.PI, pitch = 0; // touch-look
 
 function setMode(m) {
   mode = m;
-  $('modeBtn').textContent = m === 'edit' ? '🚶 Rondlopen' : '🛠 Inrichten';
+  $('modeBtn').textContent = m === 'edit' ? 'Rondlopen' : 'Inrichten';
   $('sidebar').classList.remove('open');
   $('catBtn').style.display = m === 'edit' ? '' : 'none';
   $('viewsBar').style.display = m === 'edit' ? '' : 'none';
@@ -135,6 +136,25 @@ addEventListener('keydown', e => {
     if (e.code === 'BracketLeft') nudgeY(-0.05);
     if (e.code === 'Delete' || e.code === 'Backspace') deleteSel();
     if (e.code === 'Escape') select(null);
+    // pijltjes: cm-precies verplaatsen (Shift = 10 cm). Wand-item: ↑/↓ = hoogte.
+    if (e.code.startsWith('Arrow')) {
+      e.preventDefault();
+      const step = e.shiftKey ? 0.10 : 0.01;
+      const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+      const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 1, 0));
+      tryTransform(selected, () => {
+        if (e.code === 'ArrowLeft') selected.position.addScaledVector(right, -step);
+        if (e.code === 'ArrowRight') selected.position.addScaledVector(right, step);
+        if (selected.userData.mount === 'wall') {
+          if (e.code === 'ArrowUp') selected.position.y += step;
+          if (e.code === 'ArrowDown') selected.position.y -= step;
+        } else {
+          if (e.code === 'ArrowUp') selected.position.addScaledVector(fwd, step);
+          if (e.code === 'ArrowDown') selected.position.addScaledVector(fwd, -step);
+        }
+      });
+      saveLayout();
+    }
   }
 });
 addEventListener('keyup', e => keys[e.code] = false);
@@ -223,6 +243,21 @@ for (const [n, c] of WALLPAINT) {
   wpEl.appendChild(b);
 }
 
+// keuken: vaste plek, front- en werkbladkleur instelbaar
+const KFRONT = [['Wit', 0xf2f0ea], ['Eiken', 0xc8a16b], ['Salie', 0x7d8b74], ['Antraciet', 0x44494f], ['Zwartbruin', 0x3a3028]];
+const KBLAD = [['Eiken', 0xd9bb8a], ['Licht steen', 0xe8e6e0], ['Antraciet', 0x3a3c3e]];
+function kitchenSwatches(elId, list, key) {
+  const el = $(elId);
+  for (const [n, c] of list) {
+    const b = document.createElement('button');
+    b.className = 'swatch'; b.style.background = '#' + c.toString(16).padStart(6, '0'); b.title = n;
+    b.onclick = () => { kitchenOpt[key] = c; rebuildApartment(); saveLayout(); };
+    el.appendChild(b);
+  }
+}
+kitchenSwatches('kitchenFront', KFRONT, 'front');
+kitchenSwatches('kitchenTop', KBLAD, 'top');
+
 let snap = true;
 $('snapToggle').onchange = e => snap = e.target.checked;
 $('ceilToggle').onchange = e => { if (mode === 'edit') ceiling.visible = e.target.checked; };
@@ -234,6 +269,34 @@ const ray = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let selected = null, dragging = false, ghost = null;
+
+// meubels mogen niet door muren (wand-items hangen juist óp muren)
+const bb = new THREE.Box3();
+function wouldCollide(obj) {
+  if (obj.userData.mount === 'wall') return false;
+  bb.setFromObject(obj);
+  bb.min.y += 0.03; // vloerkleed/poten net boven plint laten tellen
+  return colliders.some(c => c.intersectsBox(bb));
+}
+// plaatsen kan alleen binnen de woning of op het balkon
+function insideHome(o) {
+  const { x, z } = o.position;
+  const inApt = x > 0.02 && x < 5.115 && z > 0.02 && z < 8.28;
+  const inBalk = x > -0.26 && x < 5.39 && z >= 8.28 && z < 10.48;
+  return inApt || inBalk;
+}
+function tryTransform(obj, fn) {
+  const p = obj.position.clone(), r = obj.rotation.y;
+  fn();
+  obj.position.y = obj.userData.mount === 'wall' ? Math.max(0.15, Math.min(2.4, obj.position.y)) : 0;
+  obj.updateMatrixWorld(true);
+  if ((obj.userData.mount !== 'wall' && !insideHome(obj)) || wouldCollide(obj)) {
+    obj.position.copy(p); obj.rotation.y = r;
+    obj.updateMatrixWorld(true);
+    return false;
+  }
+  return true;
+}
 
 function setOpacity(g, op) {
   g.traverse(o => { if (o.material) { o.material = o.material.clone(); o.material.transparent = op < 1; o.material.opacity = op; } });
@@ -270,7 +333,7 @@ function placeOnPointer(obj, e) {
   } else {
     const pt = new THREE.Vector3();
     if (!ray.ray.intersectPlane(floorPlane, pt)) return;
-    obj.position.set(snapV(pt.x), 0, snapV(pt.z));
+    tryTransform(obj, () => obj.position.set(snapV(pt.x), 0, snapV(pt.z)));
   }
 }
 
@@ -300,7 +363,7 @@ function select(obj) {
     $('selPanel').style.display = 'none';
   }
 }
-function rotateSel(a) { if (selected) { selected.rotation.y += a; saveLayout(); } }
+function rotateSel(a) { if (selected) { tryTransform(selected, () => selected.rotation.y += a); saveLayout(); } }
 function nudgeY(d) {
   if (selected?.userData.mount === 'wall') {
     selected.position.y = Math.max(0.15, Math.min(2.4, selected.position.y + d));
@@ -345,6 +408,7 @@ addEventListener('pointerup', () => { if (dragging) { dragging = false; orbit.en
 function layoutJSON() {
   return JSON.stringify({
     wallColor,
+    kitchen: kitchenOpt,
     sliding: $('slideToggle').checked,
     items: furnitureGroup.children.filter(c => !c.userData.ghost).map(c => ({
       type: c.userData.type, color: c.userData.color,
@@ -358,10 +422,13 @@ function loadLayout(json) {
     const data = JSON.parse(json);
     const items = Array.isArray(data) ? data : data.items;
     if (data.wallColor) { wallColor = data.wallColor; matRef.wall.color.set(wallColor); }
+    let needRebuild = false;
+    if (data.kitchen && (data.kitchen.front || data.kitchen.top)) { kitchenOpt = data.kitchen; needRebuild = true; }
     if (data.sliding != null && data.sliding !== $('slideToggle').checked) {
       $('slideToggle').checked = data.sliding;
-      rebuildApartment();
+      needRebuild = true;
     }
+    if (needRebuild) rebuildApartment();
     furnitureGroup.clear();
     for (const it of items ?? []) {
       const f = createFurniture(it.type, it.color);

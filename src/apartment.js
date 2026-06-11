@@ -135,6 +135,7 @@ function wall(parent, mat, axis, a0, a1, at, th, h, openings = [], colliders) {
   }
   if (cur < a1) segs.push({ a: cur, b: a1, y0: 0, y1: h });
   for (const s of segs) {
+    if (s.y1 === h) s.y1 = h + 0.02; // muurtop iets het plafond in: geen lichtlek of z-fighting bij de naad
     const len = s.b - s.a, hh = s.y1 - s.y0, mid = (s.a + s.b) / 2, ym = (s.y0 + s.y1) / 2;
     if (len <= 0.001 || hh <= 0.001) continue;
     const m = axis === 'x'
@@ -237,11 +238,13 @@ function buildBathroom(g, M) {
   box(g, M.white, 0.40, 0.12, 0.40, 3.72, 0.55, 0.42);
 }
 
-function buildKitchen(g, M) {
-  // keukenblok langs westwand woonkamer, z 4.25–7.35
+function buildKitchen(g, M, opt = {}) {
+  // keukenblok langs westwand woonkamer, z 4.25–7.35 — vaste plek, front/werkblad instelbaar
+  const front = opt.front ? new THREE.MeshStandardMaterial({ color: opt.front, roughness: 0.55 }) : M.cabinet;
+  const blad = opt.top ? new THREE.MeshStandardMaterial({ color: opt.top, roughness: 0.4 }) : M.counter;
   const z0 = 4.25, z1 = 7.35, d = 0.62;
-  box(g, M.cabinet, d, 0.85, z1 - z0, d / 2, 0.425, (z0 + z1) / 2);
-  box(g, M.counter, d + 0.03, 0.04, z1 - z0 + 0.03, d / 2, 0.89, (z0 + z1) / 2);
+  box(g, front, d, 0.85, z1 - z0, d / 2, 0.425, (z0 + z1) / 2);
+  box(g, blad, d + 0.03, 0.04, z1 - z0 + 0.03, d / 2, 0.89, (z0 + z1) / 2);
   // spoelbak + kraan
   box(g, M.steel, 0.40, 0.015, 0.45, 0.31, 0.905, 5.05);
   const kr = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.35), M.steel);
@@ -249,9 +252,9 @@ function buildKitchen(g, M) {
   // kookplaat
   box(g, M.appliance, 0.50, 0.012, 0.58, 0.31, 0.90, 6.30);
   // bovenkasten
-  box(g, M.cabinet, 0.35, 0.70, z1 - z0, 0.175, 1.95, (z0 + z1) / 2);
+  box(g, front, 0.35, 0.70, z1 - z0, 0.175, 1.95, (z0 + z1) / 2);
   // hoge kast + koelkast + boiler-kolom aan zuidkant strook
-  box(g, M.cabinet, 0.62, 2.20, 0.85, 0.31, 1.10, 7.80);
+  box(g, front, 0.62, 2.20, 0.85, 0.31, 1.10, 7.80);
   box(g, M.appliance, 0.56, 0.95, 0.02, 0.31, 1.40, 7.385);
 }
 
@@ -267,7 +270,7 @@ function buildMeterkast(g, M) {
 }
 
 // ---------- hoofdopbouw ----------
-export function buildApartment({ document: doc = null, withFixtures = true, doorStyle = 'draai' } = {}) {
+export function buildApartment({ document: doc = null, withFixtures = true, doorStyle = 'draai', kitchen = {} } = {}) {
   const { W, D, H, extWall: E, intWall: I, doorH, balconyD, balconyZ0 } = DIM;
   const M = createMaterials(doc);
   const g = new THREE.Group();
@@ -352,26 +355,27 @@ export function buildApartment({ document: doc = null, withFixtures = true, door
   bdPivot.rotation.y = -1.25; // open naar balkon
 
   // --- binnenwanden ---
+  // Binnenwand-uiteinden steken 0.02 in de aangrenzende wand: flush-eindvlakken geven z-fighting strepen.
   // badkamer westwand + deur (vanuit hal)
-  wall(g, M.wall, 'z', 0, 2.20, 2.00, I, H, [{ from: 1.17, to: 2.10, bottom: 0, top: doorH }], colliders);
+  wall(g, M.wall, 'z', -0.02, 2.22, 2.00, I, H, [{ from: 1.17, to: 2.10, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'z', 1.17, 2.035, -1.45, doorStyle, -1);
   // badkamer/berging scheiding
-  wall(g, M.wall, 'z', 0, 2.20, 3.97, I, H, [], colliders);
+  wall(g, M.wall, 'z', -0.02, 2.22, 3.97, I, H, [], colliders);
   // zuidwand badkamer+berging, met bergingdeur (vanuit slaapkamer)
-  wall(g, M.wall, 'x', 2.07, 5.135, 2.20, I, H, [{ from: 4.10, to: 5.03, bottom: 0, top: doorH }], colliders);
+  wall(g, M.wall, 'x', 2.05, 5.155, 2.20, I, H, [{ from: 4.10, to: 5.03, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'x', 4.10, 2.235, 1.45, doorStyle, -1);
   // slaapkamer westwand
-  wall(g, M.wall, 'z', 2.27, 4.84, 2.00, I, H, [], colliders);
+  wall(g, M.wall, 'z', 2.25, 4.86, 2.00, I, H, [], colliders);
   // slaapkamer zuidwand + deur oostzijde (vanuit woonkamer)
-  wall(g, M.wall, 'x', 2.07, 5.135, 4.77, I, H, [{ from: 4.05, to: 4.98, bottom: 0, top: doorH }], colliders);
+  wall(g, M.wall, 'x', 2.05, 5.155, 4.77, I, H, [{ from: 4.05, to: 4.98, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'x', 4.05, 4.805, -1.45, doorStyle, -1);
-  // techniek: oostwand + deur, noordwand
-  wall(g, M.wall, 'z', 2.27, 3.97, 0.92, I, H, [{ from: 2.90, to: 3.83, bottom: 0, top: doorH }], colliders);
+  // techniek: oostwand + deur, noord- en zuidwand
+  wall(g, M.wall, 'z', 2.25, 3.99, 0.92, I, H, [{ from: 2.90, to: 3.83, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'z', 2.90, 0.955, -0.9, doorStyle, -1);
-  wall(g, M.wall, 'x', 0, 0.92, 2.20, I, H, [], colliders);
-  wall(g, M.wall, 'x', 0, 0.92, 3.97, I, H, [], colliders); // techniek zuidwand
+  wall(g, M.wall, 'x', -0.02, 0.99, 2.20, I, H, [], colliders);
+  wall(g, M.wall, 'x', -0.02, 0.99, 3.97, I, H, [], colliders);
   // hal zuidwand + deur naar woonkamer
-  wall(g, M.wall, 'x', 0.92, 2.07, 3.97, I, H, [{ from: 0.99, to: 1.92, bottom: 0, top: doorH }].filter(o => o.from >= 0.92), colliders);
+  wall(g, M.wall, 'x', 0.94, 2.05, 3.97, I, H, [{ from: 0.99, to: 1.92, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'x', 0.99, 4.005, -1.45, doorStyle, -1);
 
   // badkamer wandtegels mat wit 30×60 tot plafond (techn. omschrijving)
@@ -418,7 +422,7 @@ export function buildApartment({ document: doc = null, withFixtures = true, door
 
   if (withFixtures) {
     buildBathroom(g, M);
-    buildKitchen(g, M);
+    buildKitchen(g, M, kitchen);
     buildTech(g, M);
     buildMeterkast(g, M);
   }
