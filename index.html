@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HOEF! Ede — Appartement 163 · Ervaar je nieuwe thuis in 3D</title>
+<meta name="description" content="Tweekamer-hoekappartement van 41 m² met zuidbalkon in nieuwbouwproject HOEF! Ede. Bekijk, beleef en richt het in met de interactieve 3D-simulator." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,600;9..144,900&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0e0c0a;
+    --bg2: #161310;
+    --cream: #f3ede4;
+    --muted: #a89f93;
+    --brick: #c95d2c;
+    --brick2: #e8743a;
+    --line: rgba(243, 237, 228, .14);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    background: var(--bg); color: var(--cream);
+    font: 16px/1.65 'Inter', system-ui, sans-serif;
+    overflow-x: clip;
+  }
+  h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 600; line-height: 1.05; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+  .kicker {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: var(--brick2); font-weight: 700;
+  }
+  .kicker::before { content: ''; width: 34px; height: 1px; background: var(--brick2); }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; mix-blend-mode: difference;
+  }
+  nav .logo { font-family: 'Fraunces', serif; font-weight: 900; font-size: 22px; color: #fff; text-decoration: none; }
+  nav .cta { color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; border: 1px solid #fff; border-radius: 99px; padding: 9px 18px; }
+
+  #hero { position: relative; height: 100svh; min-height: 620px; overflow: clip; display: grid; place-items: end start; }
+  #hero .bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.15); filter: brightness(.72) saturate(1.05); }
+  #hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(14,12,10,.25), transparent 40%, rgba(14,12,10,.92) 96%); }
+  #hero .inner { position: relative; z-index: 2; padding: 0 28px 9svh; max-width: 1180px; width: 100%; margin: 0 auto; }
+  #hero h1 { font-size: clamp(54px, 11vw, 150px); font-weight: 900; letter-spacing: -.02em; }
+  #hero h1 .nr { color: var(--brick2); font-style: italic; }
+  #hero p.sub { margin-top: 18px; max-width: 560px; font-size: clamp(16px, 2vw, 20px); color: #e9e2d6; }
+  #hero .line { overflow: hidden; }
+  #hero .line > span { display: inline-block; }
+  #scrollcue {
+    position: absolute; right: 30px; bottom: 30px; z-index: 3; color: var(--cream); font-size: 11px;
+    letter-spacing: .25em; text-transform: uppercase; writing-mode: vertical-rl; display: flex; align-items: center; gap: 10px; opacity: .7;
+  }
+  #scrollcue::after { content: ''; width: 1px; height: 46px; background: var(--cream); animation: cue 1.8s ease-in-out infinite; }
+  @keyframes cue { 0% { transform: scaleY(0); transform-origin: top } 50% { transform: scaleY(1); transform-origin: top } 51% { transform-origin: bottom } 100% { transform: scaleY(0); transform-origin: bottom } }
+
+  #intro { padding: 18svh 0 14svh; }
+  #intro .statement { font-family: 'Fraunces', serif; font-size: clamp(28px, 4.6vw, 56px); line-height: 1.18; max-width: 980px; font-weight: 300; }
+  #intro .statement b { font-weight: 600; color: var(--brick2); font-style: italic; }
+  #intro .statement .w { display: inline-block; opacity: .12; }
+
+  #stats { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--bg2); }
+  #stats .grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+  #stats .cell { padding: 44px 20px; text-align: center; border-left: 1px solid var(--line); }
+  #stats .cell:first-child { border-left: 0; }
+  #stats .num { font-family: 'Fraunces', serif; font-size: clamp(34px, 4.4vw, 58px); font-weight: 900; }
+  #stats .num small { font-size: .45em; color: var(--brick2); }
+  #stats .lbl { margin-top: 6px; color: var(--muted); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+
+  #gallery { padding: 14svh 0; }
+  #gallery .head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 54px; flex-wrap: wrap; }
+  #gallery h2 { font-size: clamp(34px, 5vw, 64px); }
+  .gcard { position: relative; border-radius: 22px; overflow: clip; margin-bottom: 26px; }
+  .gcard img { display: block; width: 100%; height: clamp(320px, 62vh, 600px); object-fit: cover; transform: scale(1.18); }
+  .gcard figcaption {
+    position: absolute; left: 22px; bottom: 18px; z-index: 2; font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+    background: rgba(14, 12, 10, .55); backdrop-filter: blur(8px); padding: 9px 16px; border-radius: 99px;
+  }
+  .grow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+
+  #plan { padding: 12svh 0; background: var(--bg2); border-top: 1px solid var(--line); }
+  #plan .cols { display: grid; grid-template-columns: 1.15fr .85fr; gap: 56px; align-items: center; }
+  #plan .sheet { background: #f6f2ea; border-radius: 18px; padding: 18px; box-shadow: 0 40px 80px rgba(0, 0, 0, .45); }
+  #plan .sheet img { width: 100%; display: block; }
+  #plan h2 { font-size: clamp(32px, 4.4vw, 56px); margin: 14px 0 18px; }
+  #plan ul { list-style: none; margin-top: 26px; padding: 0; }
+  #plan li { display: flex; justify-content: space-between; gap: 18px; padding: 13px 2px; border-bottom: 1px solid var(--line); color: var(--muted); }
+  #plan li b { color: var(--cream); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+  #sim3d { padding: 14svh 0; text-align: center; overflow: clip; }
+  #sim3d h2 { font-size: clamp(38px, 6vw, 84px); font-weight: 900; }
+  #sim3d h2 em { color: var(--brick2); }
+  #sim3d p.sub { color: var(--muted); max-width: 620px; margin: 18px auto 0; }
+  model-viewer { width: min(1050px, 94vw); height: clamp(380px, 62vh, 640px); margin: 40px auto 10px; }
+  .btn-xl {
+    display: inline-block; margin-top: 26px; text-decoration: none; color: #fff; font-weight: 700; font-size: 18px;
+    background: linear-gradient(135deg, var(--brick2), var(--brick)); padding: 20px 46px; border-radius: 99px;
+    box-shadow: 0 18px 50px rgba(232, 116, 58, .35); transition: transform .25s, box-shadow .25s;
+  }
+  .btn-xl:hover { transform: translateY(-3px) scale(1.02); box-shadow: 0 26px 60px rgba(232, 116, 58, .5); }
+  #sim3d .feat { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 34px; }
+  #sim3d .feat span { border: 1px solid var(--line); border-radius: 99px; padding: 8px 16px; font-size: 13px; color: var(--muted); }
+
+  #spec { padding: 12svh 0; background: var(--bg2); border-top: 1px solid var(--line); }
+  #spec .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 48px; }
+  .scard { border: 1px solid var(--line); border-radius: 18px; padding: 26px; background: rgba(243, 237, 228, .025); }
+  .scard .ico { font-size: 26px; }
+  .scard h3 { font-size: 21px; margin: 14px 0 8px; }
+  .scard p { color: var(--muted); font-size: 14.5px; }
+
+  #loc { position: relative; overflow: clip; }
+  #loc > img { width: 100%; height: 86svh; object-fit: cover; display: block; transform: scale(1.2); filter: brightness(.55); }
+  #loc .over { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 24px; }
+  #loc h2 { font-size: clamp(32px, 5.4vw, 72px); font-weight: 900; }
+  #loc p { color: #ded6c8; max-width: 560px; margin: 16px auto 0; }
+
+  footer { padding: 60px 0 80px; text-align: center; color: var(--muted); font-size: 13px; }
+  footer .logo { font-family: 'Fraunces', serif; font-weight: 900; font-size: 26px; color: var(--cream); margin-bottom: 14px; }
+  footer a { color: var(--brick2); }
+
+  .reveal { opacity: 0; transform: translateY(46px); }
+
+  @media (max-width: 860px) {
+    #stats .grid { grid-template-columns: 1fr 1fr; }
+    #stats .cell:nth-child(3) { border-left: 0; }
+    #stats .cell { border-top: 1px solid var(--line); }
+    #stats .cell:nth-child(-n+2) { border-top: 0; }
+    .grow2, #plan .cols, #spec .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#hero">HOEF!<span style="font-style:italic">163</span></a>
+  <a class="cta" href="sim.html">Open 3D-simulator</a>
+</nav>
+
+<section id="hero">
+  <div class="bg"><img src="img/hero.jpg" alt="Artist impression HOEF! Ede" /></div>
+  <div class="inner">
+    <div class="line"><span class="kicker">Nieuwbouw · Hoefweg, Ede-Zuid</span></div>
+    <h1>
+      <div class="line"><span>Wonen aan</span></div>
+      <div class="line"><span>de Veluwe. <span class="nr">№163</span></span></div>
+    </h1>
+    <p class="sub line"><span>Tweekamer-hoekappartement van 41 m² met ruim zuidbalkon, op de tweede verdieping van kleinschalig nieuwbouwproject HOEF! — het bos op loopafstand, de stad om de hoek.</span></p>
+  </div>
+  <div id="scrollcue">scroll</div>
+</section>
+
+<section id="intro">
+  <div class="wrap">
+    <p class="statement" id="statement">Stel je voor: koffie op je <b>zuidbalkon</b>, vijf minuten fietsen naar het station, en de <b>Veluwe</b> als achtertuin. Dit is appartement 163 — compact, slim en helemaal van <b>jou</b>.</p>
+  </div>
+</section>
+
+<section id="stats">
+  <div class="grid">
+    <div class="cell"><div class="num"><span data-count="41">0</span><small> m²</small></div><div class="lbl">Woonoppervlakte</div></div>
+    <div class="cell"><div class="num"><span data-count="2">0</span><small> e</small></div><div class="lbl">Verdieping · hoek</div></div>
+    <div class="cell"><div class="num"><span data-count="195">0</span><small> cm</small></div><div class="lbl">Balkondiepte · zuid</div></div>
+    <div class="cell"><div class="num">A<small>+++</small></div><div class="lbl">Energielabel</div></div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="head">
+      <h2 class="reveal">Het gebouw</h2>
+      <p class="reveal" style="color:var(--muted);max-width:380px">20 hoogwaardige appartementen aan de Hoefweg, met eigen parkeerplek in de stallingsgarage en balkons op het zuiden.</p>
+    </div>
+    <figure class="gcard reveal">
+      <img data-prlx src="img/gevel-balkons.jpg" alt="Zuidgevel met balkons" />
+      <figcaption>Zuidzijde — jouw balkon op de 2e verdieping</figcaption>
+    </figure>
+    <div class="grow2">
+      <figure class="gcard reveal">
+        <img data-prlx src="img/gevel-straat.jpg" alt="Straatzijde" />
+        <figcaption>Entreezijde aan de Hoefweg</figcaption>
+      </figure>
+      <figure class="gcard reveal">
+        <img data-prlx src="img/gevel-hoek.jpg" alt="Hoekzijde" />
+        <figcaption>De hoek — extra ramen in de kopgevel</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="plan">
+  <div class="wrap cols">
+    <div class="sheet reveal"><img src="img/plattegrond.png" alt="Verkooptekening appartement 163" /></div>
+    <div>
+      <span class="kicker reveal">Verkooptekening VP.14</span>
+      <h2 class="reveal">Elke meter slim benut</h2>
+      <p class="reveal" style="color:var(--muted)">Hoekligging betekent ramen op twee gevels: licht van 's ochtends tot 's avonds. De woonkamer met open keuken ligt over de volle zuidzijde, met een glazen pui naar het balkon.</p>
+      <ul>
+        <li class="reveal">Woonkamer / keuken <b>5,14 × 4,29 m</b></li>
+        <li class="reveal">Slaapkamer <b>3,04 × 2,50 m</b></li>
+        <li class="reveal">Badkamer <b>1,90 × 2,20 m</b></li>
+        <li class="reveal">Berging + techniek <b>± 3,4 m²</b></li>
+        <li class="reveal">Balkon (zuid) <b>± 5,7 × 1,95 m</b></li>
+        <li class="reveal">Richtprijs <b>± € 285.000 v.o.n.</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="sim3d">
+  <div class="wrap">
+    <span class="kicker reveal">Interactief</span>
+    <h2 class="reveal">Loop er nu al<br /><em>doorheen.</em></h2>
+    <p class="sub reveal">Dit is geen video — het is jouw appartement, live in 3D. Draai het model hieronder, of start de simulator: loop rond en richt in met een IKEA-achtige catalogus vol banken, kasten, gordijnen en muurverf.</p>
+    <model-viewer class="reveal" src="exports/HOEF-163.glb" camera-controls auto-rotate shadow-intensity="1.1" camera-orbit="35deg 65deg 14m" exposure="1.1" interaction-prompt="none"></model-viewer>
+    <a class="btn-xl reveal" href="sim.html">Start de simulator →</a>
+    <div class="feat">
+      <span class="reveal">🚶 Rondlopen in first-person</span>
+      <span class="reveal">🛋 60+ meubels & accessoires</span>
+      <span class="reveal">🎨 Kleuren & muurverf</span>
+      <span class="reveal">🚪 Draai- of schuifdeuren</span>
+      <span class="reveal">📱 Werkt op je telefoon</span>
+      <span class="reveal">⬇ Export naar Blender & co</span>
+    </div>
+  </div>
+</section>
+
+<section id="spec">
+  <div class="wrap">
+    <span class="kicker reveal">Afwerking volgens technische omschrijving</span>
+    <h2 class="reveal" style="font-size:clamp(32px,4.4vw,56px);margin-top:14px">Hoogwaardig opgeleverd</h2>
+    <div class="grid">
+      <div class="scard reveal"><div class="ico">🛁</div><h3>Complete badkamer</h3><p>Wandtegels mat wit 30×60 tot het plafond, antraciet vloertegels 30×30, inloopdouche met regendouche, wandcloset en wastafelmeubel.</p></div>
+      <div class="scard reveal"><div class="ico">🌡</div><h3>Duurzaam comfort</h3><p>Ventilatielucht/water-warmtepomp, vloerverwarming én -koeling in elke ruimte, HR++ beglazing en energielabel A+++.</p></div>
+      <div class="scard reveal"><div class="ico">🔆</div><h3>Zon op het zuiden</h3><p>Ruim balkon van prefab beton over de volle gevelbreedte, met automatische screens op de zuidgevel van de 2e verdieping.</p></div>
+      <div class="scard reveal"><div class="ico">🚗</div><h3>Eigen parkeerplek</h3><p>Iedere woning beschikt over een eigen plek in de stallingsgarage onder het gebouw, plus een fietsenstalling.</p></div>
+      <div class="scard reveal"><div class="ico">🧱</div><h3>Degelijk gebouwd</h3><p>Kalkzandsteen dragende wanden, breedplaatvloeren en kunststof kozijnen — geluidsisolatie conform Bbl.</p></div>
+      <div class="scard reveal"><div class="ico">📍</div><h3>Reehorst, Ede-Zuid</h3><p>Groene, rustige wijk. In 5 minuten op intercitystation Ede-Wageningen, zo de A12/A30 op, en het Hoekelumse Bos om de hoek.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="loc">
+  <img data-prlx src="img/locatie-lucht.jpg" alt="Luchtfoto Ede met projectlocatie" />
+  <div class="over">
+    <div>
+      <span class="kicker reveal" style="justify-content:center">Hoefweg · hoek Reehorsterweg</span>
+      <h2 class="reveal">Stad én Veluwe,<br />allebei om de hoek.</h2>
+      <p class="reveal">Inschrijven kan tot woensdag 17 juni 2026, 12.00 uur via de inschrijfpagina van Domicilie.</p>
+      <a class="btn-xl reveal" style="font-size:15px;padding:15px 32px" href="https://domicilie.nl/nieuwbouw/aanbod/hoef-ede/" target="_blank" rel="noopener">Naar het project bij Domicilie ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo">HOEF!<span style="font-style:italic;color:var(--brick2)">163</span></div>
+  <p>Persoonlijk, niet-officieel visualisatieproject op basis van de verkoopdocumentatie.<br />
+  3D-model is een reconstructie — geen vervanging van de contractstukken. <a href="sim.html">Open de simulator</a>.</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" integrity="sha384-g4NTh/Iv5PPU4xPyhEWqPcwtNXOvdaDI8LLnyYfyNZOjKJeYQyjzQ9X5275eBjpt" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" integrity="sha384-Z3REaz79l2IaAZqJsSABtTbhjgOUYyV3p90XNnAPCSHg3EMTz1fouunq9WZRtj3d" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js" integrity="sha384-tKsJDT6PlUI0pSBt9/sBKJluKgA19/a6mBrDsZaXotLB4ZYfMGM6xt6/WgGpYhTm" crossorigin="anonymous"></script>
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js" integrity="sha384-Ftcjj/GNLxPvzNDftO/oryXB9aGxsGZY9JGqsXG0uUKgQDl9RfDgsx9NJ/4IVNPe" crossorigin="anonymous"></script>
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Lenis smooth scroll gekoppeld aan GSAP
+  const lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+  lenis.on('scroll', ScrollTrigger.update);
+  gsap.ticker.add(t => lenis.raf(t * 1000));
+  gsap.ticker.lagSmoothing(0);
+
+  // hero: regels omhoog + langzame zoom-out van de achtergrond
+  gsap.from('#hero .line > span', { yPercent: 120, duration: 1.3, ease: 'power4.out', stagger: 0.12, delay: 0.15 });
+  gsap.to('#hero .bg img', {
+    scale: 1.0, ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true }
+  });
+
+  // statement: woord-voor-woord oplichten tijdens scroll
+  const st = document.getElementById('statement');
+  st.innerHTML = st.innerHTML.split(/(\s+)/).map(w => /\S/.test(w) ? `<span class="w">${w}</span>` : w).join('');
+  gsap.to('#statement .w', {
+    opacity: 1, stagger: 0.06, ease: 'none',
+    scrollTrigger: { trigger: '#intro', start: 'top 75%', end: 'bottom 65%', scrub: true }
+  });
+
+  // tellers
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const end = +el.dataset.count;
+    gsap.fromTo(el, { innerText: 0 }, {
+      innerText: end, duration: 1.6, snap: { innerText: 1 }, ease: 'power2.out',
+      scrollTrigger: { trigger: '#stats', start: 'top 80%' }
+    });
+  });
+
+  // generieke reveals
+  document.querySelectorAll('.reveal').forEach(el => {
+    gsap.to(el, {
+      opacity: 1, y: 0, duration: 1.1, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%' }
+    });
+  });
+
+  // parallax op grote beelden
+  document.querySelectorAll('[data-prlx]').forEach(img => {
+    gsap.to(img, {
+      yPercent: 12, ease: 'none',
+      scrollTrigger: { trigger: img, start: 'top bottom', end: 'bottom top', scrub: true }
+    });
+  });
+</script>
+</body>
+</html>

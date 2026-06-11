@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>HOEF! 163 — 3D-simulator</title>
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: rgba(12, 16, 21, .86);
+    --bd: #2c3a46;
+    --ac: #e8743a;
+    --tx: #eef2f5;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; font: 14px/1.45 'Inter', system-ui, sans-serif; color: var(--tx); overflow: hidden; background: #10151a; touch-action: none; }
+  #app { position: fixed; inset: 0; }
+  button { font: inherit; color: var(--tx); cursor: pointer; }
+
+  #topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; gap: 8px; align-items: center; padding: 10px 14px;
+    background: linear-gradient(rgba(8, 11, 15, .9), transparent);
+    pointer-events: none;
+  }
+  #topbar > * { pointer-events: auto; }
+  #brand { font-weight: 800; letter-spacing: .4px; font-size: 15px; margin-right: 8px; white-space: nowrap; }
+  #brand b { color: var(--ac); }
+  .pill {
+    background: var(--bg); border: 1px solid var(--bd); border-radius: 99px;
+    padding: 8px 14px; backdrop-filter: blur(10px);
+  }
+  .pill:hover { border-color: var(--ac); }
+  #modeBtn { background: var(--ac); border-color: var(--ac); font-weight: 700; color: #fff; }
+  label.pill { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+  #spacer { flex: 1; }
+
+  #viewsBar {
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%); z-index: 9;
+    display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--bd);
+    border-radius: 99px; padding: 4px; backdrop-filter: blur(10px); max-width: 96vw; overflow-x: auto;
+  }
+  #viewsBar button { background: transparent; border: 0; border-radius: 99px; padding: 7px 13px; white-space: nowrap; opacity: .75; }
+  #viewsBar button.active, #viewsBar button:hover { background: #28323d; opacity: 1; }
+
+  #catBtn {
+    position: fixed; left: 14px; bottom: 14px; z-index: 11;
+    background: var(--ac); border: 0; border-radius: 14px; padding: 13px 18px;
+    font-weight: 700; color: #fff; box-shadow: 0 6px 24px rgba(232, 116, 58, .35);
+  }
+  #sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; width: 270px; z-index: 12;
+    background: var(--bg); border-right: 1px solid var(--bd); backdrop-filter: blur(14px);
+    transform: translateX(-100%); transition: transform .28s cubic-bezier(.2, .8, .2, 1);
+    display: flex; flex-direction: column;
+  }
+  #sidebar.open { transform: none; }
+  #sidebar h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .12em; color: #93a4b2; margin: 16px 16px 6px; }
+  #wallpaint { display: flex; gap: 6px; flex-wrap: wrap; padding: 0 16px 8px; }
+  #catalog { flex: 1; overflow-y: auto; padding: 4px 10px 90px; }
+  #catalog details { border-bottom: 1px solid #1f2832; }
+  #catalog summary {
+    cursor: pointer; padding: 11px 8px; font-weight: 700; list-style: none; user-select: none;
+  }
+  #catalog summary::before { content: '▸ '; color: var(--ac); }
+  #catalog details[open] summary::before { content: '▾ '; }
+  #catalog button {
+    display: flex; justify-content: space-between; align-items: center; width: 100%;
+    background: transparent; border: 0; border-radius: 8px; padding: 8px 10px; text-align: left;
+  }
+  #catalog button:hover { background: #232e3a; }
+  #catalog .sw { display: inline-flex; gap: 3px; }
+  #catalog .sw i { width: 11px; height: 11px; border-radius: 3px; border: 1px solid rgba(255, 255, 255, .25); }
+  #closeCat { position: absolute; top: 10px; right: 10px; background: transparent; border: 0; font-size: 20px; }
+
+  .swatch {
+    width: 26px; height: 26px; border-radius: 8px; border: 2px solid rgba(255, 255, 255, .25); padding: 0;
+  }
+  .swatch.on, .swatch:hover { border-color: var(--ac); transform: scale(1.1); }
+
+  #selPanel {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 11;
+    display: none; flex-direction: column; gap: 8px; align-items: center;
+    background: var(--bg); border: 1px solid var(--bd); border-radius: 16px; padding: 12px 16px;
+    backdrop-filter: blur(12px); max-width: 94vw;
+  }
+  #selName { font-weight: 700; }
+  #selColors { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+  #selBtns { display: flex; gap: 6px; }
+  #selBtns button { background: #232e3a; border: 1px solid var(--bd); border-radius: 10px; padding: 8px 12px; }
+  #btnDel { color: #ff8d7a; }
+
+  #toolbar {
+    position: fixed; right: 14px; bottom: 14px; z-index: 9; display: flex; flex-direction: column; gap: 6px;
+  }
+  #toolbar button { background: var(--bg); border: 1px solid var(--bd); border-radius: 10px; padding: 8px 12px; backdrop-filter: blur(8px); }
+
+  #hint {
+    position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 8;
+    color: #8fa1ae; font-size: 12px; background: rgba(10, 14, 18, .6); padding: 6px 12px; border-radius: 99px;
+    pointer-events: none; white-space: nowrap;
+  }
+  #crosshair { position: fixed; top: 50%; left: 50%; width: 14px; height: 14px; margin: -7px; z-index: 9; display: none; }
+  #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #fff; opacity: .85; border-radius: 2px; }
+  #crosshair::before { left: 6px; top: 0; width: 2px; height: 14px; }
+  #crosshair::after { top: 6px; left: 0; width: 14px; height: 2px; }
+
+  @media (max-width: 720px) {
+    #brand span { display: none; }
+    #topbar { flex-wrap: wrap; }
+    #viewsBar { top: auto; bottom: 76px; }
+    #hint { display: none; }
+    .pill { padding: 7px 10px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<div id="topbar">
+  <div id="brand">HOEF!<b>163</b> <span style="color:#8fa1ae;font-weight:400">· 2-kamer hoekappartement · 41 m²</span></div>
+  <button id="modeBtn" class="pill">🚶 Rondlopen</button>
+  <label class="pill"><input type="checkbox" id="ceilToggle"> Plafond</label>
+  <label class="pill"><input type="checkbox" id="slideToggle"> Schuifdeuren</label>
+  <label class="pill" style="display:none"><input type="checkbox" id="snapToggle" checked> Raster</label>
+  <span id="spacer"></span>
+  <button id="expGlb" class="pill">⬇ GLB</button>
+  <button id="expObj" class="pill">⬇ OBJ</button>
+  <button id="expStl" class="pill">⬇ STL</button>
+</div>
+
+<div id="viewsBar">
+  <button data-v="overzicht" class="active">🏠 Overzicht</button>
+  <button data-v="plattegrond">🗺 Plattegrond</button>
+  <button data-v="woonkamer">🛋 Woonkamer</button>
+  <button data-v="slaapkamer">🛏 Slaapkamer</button>
+  <button data-v="badkamer">🚿 Badkamer</button>
+  <button data-v="balkon">☀️ Balkon</button>
+</div>
+
+<button id="catBtn">＋ Inrichten</button>
+
+<div id="sidebar">
+  <button id="closeCat">✕</button>
+  <h2>Muurkleur</h2>
+  <div id="wallpaint"></div>
+  <h2>Catalogus</h2>
+  <div id="catalog"></div>
+</div>
+
+<div id="selPanel">
+  <div id="selName"></div>
+  <div id="selColors"></div>
+  <div id="selBtns">
+    <button id="btnRotL">⟲ 45°</button>
+    <button id="btnRotR">⟳ 45°</button>
+    <button id="btnUp">▲ Hoger</button>
+    <button id="btnDown">▼ Lager</button>
+    <button id="btnDel">🗑 Weg</button>
+  </div>
+</div>
+
+<div id="toolbar">
+  <button id="saveBtn" title="Inrichting opslaan als bestand">💾</button>
+  <button id="loadBtn" title="Inrichting laden">📂</button>
+  <button id="clearBtn" title="Alles leeghalen">🗑</button>
+</div>
+
+<div id="hint">Klik item in catalogus → klik om te plaatsen · sleep = verplaatsen · R/E = draaien · [ ] = hoogte · Tab = rondlopen (WASD)</div>
+<div id="crosshair"></div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="./src/main.js"></script>
+<script>
+  document.getElementById('closeCat').onclick = () => document.getElementById('sidebar').classList.remove('open');
+</script>
+</body>
+</html>
