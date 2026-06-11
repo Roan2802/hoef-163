@@ -164,6 +164,7 @@ function windowUnit(parent, M, axis, a0, a1, at, th, bottom, top, mullions = 1, 
     ? box(parent, M.glass, len - 2 * f, top - bottom - 2 * f, 0.02, (a0 + a1) / 2, (bottom + top) / 2, at + th / 2)
     : box(parent, M.glass, 0.02, top - bottom - 2 * f, len - 2 * f, at + th / 2, (bottom + top) / 2, (a0 + a1) / 2);
   g.castShadow = false;
+  g.userData.wall = true; // gordijnen/jaloezieën kunnen op ramen gehangen worden
   if (colliders) {
     colliders.push(axis === 'x'
       ? new THREE.Box3(new THREE.Vector3(a0, bottom, at), new THREE.Vector3(a1, top, at + th))
