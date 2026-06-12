@@ -61,6 +61,7 @@
     }
   }
   function mount() {
+    if (localStorage.getItem(GATE_KEY) === GATE_HASH) { document.documentElement.style.overflow = ''; return; }
     document.body.appendChild(el);
     document.getElementById('gateBtn').onclick = tryCode;
     document.getElementById('gateCode').addEventListener('keydown', e => { if (e.key === 'Enter') tryCode(); });

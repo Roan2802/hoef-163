@@ -242,20 +242,23 @@ function buildKitchen(g, M, opt = {}) {
   // keukenblok langs westwand woonkamer, z 4.25–7.35 — vaste plek, front/werkblad instelbaar
   const front = opt.front ? new THREE.MeshStandardMaterial({ color: opt.front, roughness: 0.55 }) : M.cabinet;
   const blad = opt.top ? new THREE.MeshStandardMaterial({ color: opt.top, roughness: 0.4 }) : M.counter;
-  const z0 = 4.25, z1 = 7.35, d = 0.62;
+  // compacte keuken: hoge koel/vrieskast noordzijde tegen techniekwand, zuidelijk deel woonkamer vrij
+  const z0 = 4.97, z1 = 6.57, d = 0.62;
+  // hoge kast met koelkast/vriezer, direct tegen wand techniekhok
+  box(g, front, d, 2.20, 0.87, d / 2, 1.10, 4.525);
+  box(g, M.appliance, d - 0.06, 1.20, 0.02, 0.31, 1.45, 4.965);
+  box(g, M.appliance, d - 0.06, 0.70, 0.02, 0.31, 0.60, 4.965);
+  // onderkasten + werkblad
   box(g, front, d, 0.85, z1 - z0, d / 2, 0.425, (z0 + z1) / 2);
   box(g, blad, d + 0.03, 0.04, z1 - z0 + 0.03, d / 2, 0.89, (z0 + z1) / 2);
   // spoelbak + kraan
-  box(g, M.steel, 0.40, 0.015, 0.45, 0.31, 0.905, 5.05);
+  box(g, M.steel, 0.40, 0.015, 0.45, 0.31, 0.905, 5.35);
   const kr = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.35), M.steel);
-  kr.position.set(0.12, 1.07, 5.05); g.add(kr);
+  kr.position.set(0.12, 1.07, 5.35); g.add(kr);
   // kookplaat
-  box(g, M.appliance, 0.50, 0.012, 0.58, 0.31, 0.90, 6.30);
+  box(g, M.appliance, 0.50, 0.012, 0.58, 0.31, 0.90, 6.15);
   // bovenkasten
   box(g, front, 0.35, 0.70, z1 - z0, 0.175, 1.95, (z0 + z1) / 2);
-  // hoge kast + koelkast + boiler-kolom aan zuidkant strook
-  box(g, front, 0.62, 2.20, 0.85, 0.31, 1.10, 7.80);
-  box(g, M.appliance, 0.56, 0.95, 0.02, 0.31, 1.40, 7.385);
 }
 
 function buildTech(g, M) {
@@ -325,34 +328,36 @@ export function buildApartment({ document: doc = null, withFixtures = true, door
   innerDoor(g, M, 'x', 0.53, 0, 0).children[0].material = M.frame; // voordeur antraciet
   // west (woningscheidend)
   wall(g, M.wall, 'z', -E, D + E, -E, E, H, [], colliders);
-  // oost (kopgevel, ramen): berging, slaapkamer, woonkamer
+  // oost (kopgevel): exact 2 smalle hoge ramen conform tekening — slaapkamer en woonkamer
   wall(g, M.extWall, 'z', -E, D + E, W, E, H, [
-    { from: 0.45, to: 1.45, bottom: 1.05, top: 2.35 },
-    { from: 2.60, to: 4.40, bottom: 0.45, top: 2.35 },
-    { from: 5.10, to: 8.10, bottom: 0.30, top: 2.35 },
+    { from: 3.16, to: 4.08, bottom: 0.60, top: 2.35 },
+    { from: 5.98, to: 6.87, bottom: 0.60, top: 2.35 },
   ], colliders);
-  windowUnit(g, M, 'z', 0.45, 1.45, W, E, 1.05, 2.35, 1, colliders);
-  windowUnit(g, M, 'z', 2.60, 4.40, W, E, 0.45, 2.35, 2, colliders);
-  windowUnit(g, M, 'z', 5.10, 8.10, W, E, 0.30, 2.35, 3, colliders);
-  // zuid (balkonpui): glas x 0.40–4.90, alleen deuropening x 2.72–3.62 doorloopbaar
-  wall(g, M.extWall, 'x', -E, W + E, D, E, H, [{ from: 0.40, to: 4.90, bottom: 0, top: 2.35 }], colliders);
-  windowUnit(g, M, 'x', 0.40, 2.70, D, E, 0, 2.35, 2, colliders);
-  windowUnit(g, M, 'x', 3.64, 4.90, D, E, 0, 2.35, 1, colliders);
-  // balkondeur: kozijn zonder glasvulling, blad staat open naar het balkon
+  windowUnit(g, M, 'z', 3.16, 4.08, W, E, 0.60, 2.35, 1, colliders);
+  windowUnit(g, M, 'z', 5.98, 6.87, W, E, 0.60, 2.35, 1, colliders);
+  // zuid (balkonpui), vanaf balkon gezien links→rechts: raam · penant · raam · deur (rechts/oost)
+  wall(g, M.extWall, 'x', -E, W + E, D, E, H, [
+    { from: 0.55, to: 1.50, bottom: 0, top: 2.35 },
+    { from: 2.30, to: 3.25, bottom: 0, top: 2.35 },
+    { from: 3.90, to: 4.84, bottom: 0, top: 2.35 },
+  ], colliders);
+  windowUnit(g, M, 'x', 0.55, 1.50, D, E, 0, 2.35, 1, colliders);
+  windowUnit(g, M, 'x', 2.30, 3.25, D, E, 0, 2.35, 1, colliders);
+  // balkondeur: kozijn zonder glasvulling, blad scharniert oost (rechts) en staat open naar het balkon
   const bf = 0.06;
-  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 2.71, 1.175, D + E / 2);
-  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 3.63, 1.175, D + E / 2);
-  box(g, M.frame, 3.62 - 2.72, bf, E + 0.02, 3.17, 2.35 - bf / 2, D + E / 2);
+  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 3.91, 1.175, D + E / 2);
+  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 4.83, 1.175, D + E / 2);
+  box(g, M.frame, 4.82 - 3.92, bf, E + 0.02, 4.37, 2.35 - bf / 2, D + E / 2);
   const bdPivot = new THREE.Group();
-  bdPivot.position.set(2.72, 0, D + E - 0.02);
+  bdPivot.position.set(4.84, 0, D + E - 0.02);
   g.add(bdPivot);
   const bdW = 0.90;
   const bdLeaf = new THREE.Group();
   bdPivot.add(bdLeaf);
-  box(bdLeaf, M.frame, bdW, 2.35, 0.05, bdW / 2, 1.175, 0);
-  const bdGlass = box(bdLeaf, M.glass, bdW - 0.12, 2.35 - 0.24, 0.02, bdW / 2, 1.175, 0);
+  box(bdLeaf, M.frame, bdW, 2.35, 0.05, -bdW / 2, 1.175, 0);
+  const bdGlass = box(bdLeaf, M.glass, bdW - 0.12, 2.35 - 0.24, 0.02, -bdW / 2, 1.175, 0);
   bdGlass.castShadow = false;
-  bdPivot.rotation.y = -1.25; // open naar balkon
+  bdPivot.rotation.y = 1.25; // open naar balkon
 
   // --- binnenwanden ---
   // Binnenwand-uiteinden steken 0.02 in de aangrenzende wand: flush-eindvlakken geven z-fighting strepen.
@@ -370,8 +375,8 @@ export function buildApartment({ document: doc = null, withFixtures = true, door
   wall(g, M.wall, 'x', 2.05, 5.155, 4.77, I, H, [{ from: 4.05, to: 4.98, bottom: 0, top: doorH }], colliders);
   innerDoor(g, M, 'x', 4.05, 4.805, -1.45, doorStyle, -1);
   // techniek: oostwand + deur, noord- en zuidwand
-  wall(g, M.wall, 'z', 2.25, 3.99, 0.92, I, H, [{ from: 2.90, to: 3.83, bottom: 0, top: doorH }], colliders);
-  innerDoor(g, M, 'z', 2.90, 0.955, -0.9, doorStyle, -1);
+  wall(g, M.wall, 'z', 2.25, 3.99, 0.92, I, H, [{ from: 2.34, to: 3.27, bottom: 0, top: doorH }], colliders);
+  innerDoor(g, M, 'z', 2.34, 0.955, 0.9, doorStyle, 1);
   wall(g, M.wall, 'x', -0.02, 0.99, 2.20, I, H, [], colliders);
   wall(g, M.wall, 'x', -0.02, 0.99, 3.97, I, H, [], colliders);
   // hal zuidwand + deur naar woonkamer

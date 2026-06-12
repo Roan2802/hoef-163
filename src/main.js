@@ -165,7 +165,7 @@ function collides(p) {
   return colliders.some(b => b.intersectsBox(me));
 }
 const clock = new THREE.Clock();
-const joy = { move: null, look: null, mv: new THREE.Vector2() };
+const joy = { id: null, x: 0, y: 0, hold: false, moved: false, timer: null };
 function updateWalk(dt) {
   const speed = (keys.ShiftLeft ? 4.2 : 2.2) * dt;
   const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
@@ -175,7 +175,7 @@ function updateWalk(dt) {
   if (keys.KeyS || keys.ArrowDown) dir.sub(fwd);
   if (keys.KeyD || keys.ArrowRight) dir.add(right);
   if (keys.KeyA || keys.ArrowLeft) dir.sub(right);
-  if (IS_TOUCH) { dir.add(fwd.clone().multiplyScalar(-joy.mv.y)); dir.add(right.clone().multiplyScalar(joy.mv.x)); }
+  if (IS_TOUCH && joy.hold) dir.add(fwd); // vinger vasthouden = vooruit lopen
   if (dir.lengthSq() < 0.0001) return;
   dir.normalize().multiplyScalar(speed);
   const p = camera.position;
@@ -186,32 +186,33 @@ function updateWalk(dt) {
   p.y = EYE;
 }
 
-// touch: linkerhelft scherm = lopen, rechterhelft = rondkijken
+// touch: slepen = rondkijken, vasthouden (zonder slepen) = vooruit lopen; slepen tijdens lopen = sturen
 renderer.domElement.addEventListener('touchstart', e => {
   if (mode !== 'walk') return;
-  for (const t of e.changedTouches) {
-    if (t.clientX < innerWidth / 2 && !joy.move) joy.move = { id: t.identifier, x: t.clientX, y: t.clientY };
-    else if (!joy.look) joy.look = { id: t.identifier, x: t.clientX, y: t.clientY };
-  }
+  const t = e.changedTouches[0];
+  if (joy.id != null) return;
+  joy.id = t.identifier; joy.x = t.clientX; joy.y = t.clientY; joy.moved = false;
+  joy.timer = setTimeout(() => { if (!joy.moved) joy.hold = true; }, 220);
 }, { passive: true });
 renderer.domElement.addEventListener('touchmove', e => {
   if (mode !== 'walk') return;
   e.preventDefault();
   for (const t of e.changedTouches) {
-    if (joy.move && t.identifier === joy.move.id) {
-      joy.mv.set((t.clientX - joy.move.x) / 60, (t.clientY - joy.move.y) / 60).clampLength(0, 1);
-    } else if (joy.look && t.identifier === joy.look.id) {
-      yaw -= (t.clientX - joy.look.x) * 0.005;
-      pitch = Math.max(-1.4, Math.min(1.4, pitch - (t.clientY - joy.look.y) * 0.005));
-      camera.rotation.set(pitch, yaw, 0);
-      joy.look.x = t.clientX; joy.look.y = t.clientY;
-    }
+    if (t.identifier !== joy.id) continue;
+    const dxm = t.clientX - joy.x, dym = t.clientY - joy.y;
+    if (Math.abs(dxm) + Math.abs(dym) > 9) joy.moved = true;
+    yaw -= dxm * 0.005;
+    pitch = Math.max(-1.4, Math.min(1.4, pitch - dym * 0.005));
+    camera.rotation.set(pitch, yaw, 0);
+    joy.x = t.clientX; joy.y = t.clientY;
   }
 }, { passive: false });
 renderer.domElement.addEventListener('touchend', e => {
   for (const t of e.changedTouches) {
-    if (joy.move && t.identifier === joy.move.id) { joy.move = null; joy.mv.set(0, 0); }
-    if (joy.look && t.identifier === joy.look.id) joy.look = null;
+    if (t.identifier === joy.id) {
+      clearTimeout(joy.timer);
+      joy.id = null; joy.hold = false; joy.moved = false;
+    }
   }
 });
 
