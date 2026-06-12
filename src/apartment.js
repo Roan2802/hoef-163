@@ -335,21 +335,21 @@ export function buildApartment({ document: doc = null, withFixtures = true, door
   ], colliders);
   windowUnit(g, M, 'z', 3.16, 4.08, W, E, 0.60, 2.35, 1, colliders);
   windowUnit(g, M, 'z', 5.98, 6.87, W, E, 0.60, 2.35, 1, colliders);
-  // zuid (balkonpui), vanaf balkon gezien links→rechts: raam · penant · raam · deur (rechts/oost)
+  // zuid (balkonpui), vanaf balkon gezien links→rechts: 2 ramen naast elkaar · penant · 2 ramen · deur (rechts)
   wall(g, M.extWall, 'x', -E, W + E, D, E, H, [
-    { from: 0.55, to: 1.50, bottom: 0, top: 2.35 },
-    { from: 2.30, to: 3.25, bottom: 0, top: 2.35 },
-    { from: 3.90, to: 4.84, bottom: 0, top: 2.35 },
+    { from: 0.22, to: 1.86, bottom: 0, top: 2.35 },
+    { from: 2.62, to: 4.03, bottom: 0, top: 2.35 },
+    { from: 4.05, to: 4.99, bottom: 0, top: 2.35 },
   ], colliders);
-  windowUnit(g, M, 'x', 0.55, 1.50, D, E, 0, 2.35, 1, colliders);
-  windowUnit(g, M, 'x', 2.30, 3.25, D, E, 0, 2.35, 1, colliders);
+  windowUnit(g, M, 'x', 0.22, 1.86, D, E, 0, 2.35, 2, colliders);
+  windowUnit(g, M, 'x', 2.62, 4.03, D, E, 0, 2.35, 2, colliders);
   // balkondeur: kozijn zonder glasvulling, blad scharniert oost (rechts) en staat open naar het balkon
   const bf = 0.06;
-  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 3.91, 1.175, D + E / 2);
-  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 4.83, 1.175, D + E / 2);
-  box(g, M.frame, 4.82 - 3.92, bf, E + 0.02, 4.37, 2.35 - bf / 2, D + E / 2);
+  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 4.06, 1.175, D + E / 2);
+  box(g, M.frame, 0.02 + bf, 2.35, E + 0.02, 4.98, 1.175, D + E / 2);
+  box(g, M.frame, 4.97 - 4.07, bf, E + 0.02, 4.52, 2.35 - bf / 2, D + E / 2);
   const bdPivot = new THREE.Group();
-  bdPivot.position.set(4.84, 0, D + E - 0.02);
+  bdPivot.position.set(4.99, 0, D + E - 0.02);
   g.add(bdPivot);
   const bdW = 0.90;
   const bdLeaf = new THREE.Group();
